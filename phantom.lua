@@ -1,14 +1,3 @@
---[[
-
-		Gui2Lua™
-		10zOfficial
-		Version 1.0.0
-
-]]
-
-
--- Instances
-
 local ScreenGui = Instance.new("ScreenGui")
 local exe = Instance.new("Frame")
 local executor = Instance.new("Frame")
