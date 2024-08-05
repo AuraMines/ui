@@ -20,9 +20,6 @@ local TextLabel_3 = Instance.new("TextLabel")
 local TextLabel_4 = Instance.new("TextLabel")
 local TextButton_4 = Instance.new("TextButton")
 local UICorner_7 = Instance.new("UICorner")
-local Frame_2 = Instance.new("Frame")
-local icon = Instance.new("ImageLabel")
-local text = Instance.new("TextLabel")
 
 -- Properties
 
@@ -37,7 +34,6 @@ exe.BorderColor3 = Color3.new(0, 0, 0)
 exe.BorderSizePixel = 0
 exe.Position = UDim2.new(-0.306574911, 0, -0.153846234, 0)
 exe.Size = UDim2.new(0, 2897, 0, 1710)
-exe.Visible = false
 
 executor.Name = "executor"
 executor.Parent = exe
@@ -214,118 +210,68 @@ TextButton_4.TextWrapped = true
 
 UICorner_7.Parent = TextButton_4
 
-Frame_2.Parent = ScreenGui
-Frame_2.BackgroundColor3 = Color3.new(0.184314, 0.184314, 0.184314)
-Frame_2.BorderColor3 = Color3.new(0, 0, 0)
-Frame_2.BorderSizePixel = 0
-Frame_2.Position = UDim2.new(0.368501514, 0, 0.29468599, 0)
-Frame_2.Size = UDim2.new(0, 344, 0, 339)
+-- TextButton LocalScript
+TextButton.MouseButton1Click:Connect(function()
+    loadstring(TextButton.Parent.Parent.TextBox.Text)()
+end)
 
-icon.Name = "icon"
-icon.Parent = Frame_2
-icon.BackgroundColor3 = Color3.new(1, 1, 1)
-icon.BackgroundTransparency = 1
-icon.BorderColor3 = Color3.new(0, 0, 0)
-icon.BorderSizePixel = 0
-icon.Position = UDim2.new(0.188306943, 0, 0.127727315, 0)
-icon.Size = UDim2.new(0, 213, 0, 212)
-icon.Image = "rbxassetid://18818085230"
+-- TextButton_2 LocalScript
+TextButton_2.MouseButton1Click:Connect(function()
+    TextButton_2.Parent.Parent.TextBox.Text = ""
+end)
 
-text.Name = "text"
-text.Parent = icon
-text.BackgroundColor3 = Color3.new(1, 1, 1)
-text.BackgroundTransparency = 1
-text.BorderColor3 = Color3.new(0, 0, 0)
-text.BorderSizePixel = 0
-text.Position = UDim2.new(0.042264279, 0, 1.04746842, 0)
-text.Size = UDim2.new(0, 194, 0, 9)
-text.Font = Enum.Font.SourceSansBold
-text.Text = "Loading.."
-text.TextColor3 = Color3.new(0.772549, 0.772549, 0.772549)
-text.TextSize = 83
-text.TextTransparency = 1
-
--- LocalScript under ScreenGui
-
--- Services
+-- executor.drag LocalScript
 local UIS = game:GetService('UserInputService')
-local TweenService = game:GetService("TweenService")
+local frame = executor
+local dragToggle = nil
+local dragSpeed = 0.25
+local dragStart = nil
+local startPos = nil
 
--- GUI Elements
-local screenGui = script.Parent
-local executor = screenGui.exe
-local textbox = executor.TextBox
-local chats = executor.chats
-local message = executor.message
-local frame2 = screenGui.Frame_2
-
--- Button References
-local exeButton = executor.TextButton
-local clrButton = executor.TextButton_2
-local aiButton = executor.TextButton_3
-local removeTextButton = executor.TextButton_4
-
--- Setup Functions
-local function onExeButtonClick()
-    loadstring(textbox.Text)()
+local function updateInput(input)
+    local delta = input.Position - dragStart
+    local position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+        startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    game:GetService('TweenService'):Create(frame, TweenInfo.new(dragSpeed), {Position = position}):Play()
 end
 
-local function onClrButtonClick()
-    textbox.Text = ""
-end
-
-local function onAiButtonClick()
-    textbox.Visible = false
-end
-
-local function onRemoveTextButtonClick()
-    removeTextButton.Parent:Destroy()
-end
-
-local function onFrame2Script()
-    local image = frame2.icon
-    local text = image.text
-    
-    local startTransparency = 1
-    local endTransparency = 0
-    local duration = 3
-    
-    local imageStartPosition = UDim2.new(0.188, 0,0.187, 0)
-    local imageEndPosition = UDim2.new(0.188, 0,0.128, 0)
-    
-    local imagePositionTween = TweenService:Create(image, TweenInfo.new(duration), {Position = imageEndPosition})
-    local imageTransparencyTween = TweenService:Create(image, TweenInfo.new(duration), {ImageTransparency = endTransparency})
-    local textTransparencyTween = TweenService:Create(text, TweenInfo.new(duration), {TextTransparency = endTransparency})
-    
-    image.Position = imageStartPosition
-    image.ImageTransparency = startTransparency
-    text.TextTransparency = startTransparency
-    
-    imagePositionTween:Play()
-    imageTransparencyTween:Play()
-    textTransparencyTween:Play()
-    
-    wait(5)
-    
-    executor.Visible = true
-    frame2:Destroy()
-end
-
-local function onKeyPress(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.Insert then
-        executor.Visible = not executor.Visible    
+frame.InputBegan:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then 
+        dragToggle = true
+        dragStart = input.Position
+        startPos = frame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragToggle = false
+            end
+        end)
     end
-end
+end)
 
--- Connect Button Actions
-exeButton.MouseButton1Click:Connect(onExeButtonClick)
-clrButton.MouseButton1Click:Connect(onClrButtonClick)
-aiButton.MouseButton1Click:Connect(onAiButtonClick)
-removeTextButton.MouseButton1Click:Connect(onRemoveTextButtonClick)
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if dragToggle then
+            updateInput(input)
+        end
+    end
+end)
 
--- Connect Keybind
-UIS.InputBegan:Connect(onKeyPress)
+-- TextButton_3 LocalScript
+TextButton_3.MouseButton1Click:Connect(function()
+    TextButton_3.Parent.Parent.TextBox.Visible = false
+end)
 
--- Run Frame2 Script
-onFrame2Script()
+-- TextButton_4 LocalScript
+TextButton_4.MouseButton1Click:Connect(function()
+    TextButton_4.Parent.Parent:Destroy()
+end)
 
+-- ScreenGui LocalScript
+local UserInputService = game:GetService("UserInputService")
+UserInputService.InputBegan:Connect(function(Input, gameprocess)
+    if not gameprocess then
+        if Input.KeyCode == Enum.KeyCode.Insert then
+            executor.Visible = not executor.Visible
+        end
+    end
+end)
