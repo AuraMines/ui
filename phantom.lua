@@ -256,130 +256,87 @@ text.TextColor3 = Color3.new(0.772549, 0.772549, 0.772549)
 text.TextSize = 83
 text.TextTransparency = 1
 
--- Scripts
+-- LocalScript under ScreenGui
 
-local function IDFMQHC_fake_script() -- TextButton.LocalScript 
-	local script = Instance.new('LocalScript', TextButton)
+-- Services
+local UIS = game:GetService('UserInputService')
+local TweenService = game:GetService("TweenService")
 
-	local textbox = script.Parent.Parent.TextBox
-	
-	script.Parent.MouseButton1Click:Connect(function()
-		loadstring(textbox.Text)
-	end)
+-- GUI Elements
+local screenGui = script.Parent
+local executor = screenGui.exe
+local textbox = executor.TextBox
+local chats = executor.chats
+local message = executor.message
+local frame2 = screenGui.Frame_2
+
+-- Button References
+local exeButton = executor.TextButton
+local clrButton = executor.TextButton_2
+local aiButton = executor.TextButton_3
+local removeTextButton = executor.TextButton_4
+
+-- Setup Functions
+local function onExeButtonClick()
+    loadstring(textbox.Text)()
 end
-coroutine.wrap(IDFMQHC_fake_script)()
-local function OLQI_fake_script() -- TextButton_2.LocalScript 
-	local script = Instance.new('LocalScript', TextButton_2)
 
-	local textbox = script.Parent.Parent.TextBox
-	
-	script.Parent.MouseButton1Click:Connect(function()
-		textbox.Text = ""
-	end)
+local function onClrButtonClick()
+    textbox.Text = ""
 end
-coroutine.wrap(OLQI_fake_script)()
-local function ZGYIHXU_fake_script() -- executor.drag 
-	local script = Instance.new('LocalScript', executor)
 
-	local UIS = game:GetService('UserInputService')
-	local frame = script.Parent
-	local dragToggle = nil
-	local dragSpeed = 0.25
-	local dragStart = nil
-	local startPos = nil
-	
-	local function updateInput(input)
-		local delta = input.Position - dragStart
-		local position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-			startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-		game:GetService('TweenService'):Create(frame, TweenInfo.new(dragSpeed), {Position = position}):Play()
-	end
-	
-	frame.InputBegan:Connect(function(input)
-		if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then 
-			dragToggle = true
-			dragStart = input.Position
-			startPos = frame.Position
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragToggle = false
-				end
-			end)
-		end
-	end)
-	
-	UIS.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			if dragToggle then
-				updateInput(input)
-			end
-		end
-	end)
+local function onAiButtonClick()
+    textbox.Visible = false
 end
-coroutine.wrap(ZGYIHXU_fake_script)()
-local function QZFAEM_fake_script() -- TextButton_3.LocalScript 
-	local script = Instance.new('LocalScript', TextButton_3)
 
-	local textbox = script.Parent.Parent.TextBox
-	
-	script.Parent.MouseButton1Click:Connect(function()
-		textbox.Visible = false
-	end)
+local function onRemoveTextButtonClick()
+    removeTextButton.Parent:Destroy()
 end
-coroutine.wrap(QZFAEM_fake_script)()
-local function MQLRB_fake_script() -- TextButton_4.LocalScript 
-	local script = Instance.new('LocalScript', TextButton_4)
 
-	script.Parent.MouseButton1Click:Connect(function()
-		script.Parent.Parent:Destroy()
-	end)
+local function onFrame2Script()
+    local image = frame2.icon
+    local text = image.text
+    
+    local startTransparency = 1
+    local endTransparency = 0
+    local duration = 3
+    
+    local imageStartPosition = UDim2.new(0.188, 0,0.187, 0)
+    local imageEndPosition = UDim2.new(0.188, 0,0.128, 0)
+    
+    local imagePositionTween = TweenService:Create(image, TweenInfo.new(duration), {Position = imageEndPosition})
+    local imageTransparencyTween = TweenService:Create(image, TweenInfo.new(duration), {ImageTransparency = endTransparency})
+    local textTransparencyTween = TweenService:Create(text, TweenInfo.new(duration), {TextTransparency = endTransparency})
+    
+    image.Position = imageStartPosition
+    image.ImageTransparency = startTransparency
+    text.TextTransparency = startTransparency
+    
+    imagePositionTween:Play()
+    imageTransparencyTween:Play()
+    textTransparencyTween:Play()
+    
+    wait(5)
+    
+    executor.Visible = true
+    frame2:Destroy()
 end
-coroutine.wrap(MQLRB_fake_script)()
-local function NDAMG_fake_script() -- Frame_2.LocalScript 
-	local script = Instance.new('LocalScript', Frame_2)
 
-	local TweenService = game:GetService("TweenService")
-	local image = script.Parent.icon
-	local text = image.text
-	
-	local startTransparency = 1
-	local endTransparency = 0
-	local duration = 3
-	
-	local imageStartPosition = UDim2.new(0.188, 0,0.187, 0)
-	local imageEndPosition = UDim2.new(0.188, 0,0.128, 0)
-	
-	local imagePositionTween = TweenService:Create(image, TweenInfo.new(duration), {Position = imageEndPosition})
-	local imageTransparencyTween = TweenService:Create(image, TweenInfo.new(duration), {ImageTransparency = endTransparency})
-	local textTransparencyTween = TweenService:Create(text, TweenInfo.new(duration), {TextTransparency = endTransparency})
-	
-	image.Position = imageStartPosition
-	image.ImageTransparency = startTransparency
-	text.TextTransparency = startTransparency
-	
-	imagePositionTween:Play()
-	imageTransparencyTween:Play()
-	textTransparencyTween:Play()
-	
-	wait(5)
-	
-	script.Parent.Parent.exe.Visible = true
-	script.Parent:Destroy()
-	script.Parent.icon:Destroy()
+local function onKeyPress(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.Insert then
+        executor.Visible = not executor.Visible    
+    end
 end
-coroutine.wrap(NDAMG_fake_script)()
-local function ETAOMU_fake_script() -- ScreenGui.LocalScript 
-	local script = Instance.new('LocalScript', ScreenGui)
 
-	local executor = script.Parent.exe
-	local UserInputService = game:GetService("UserInputService")
-	
-	UserInputService.InputBegan:Connect(function(Input, gameprocess)
-		if not gameprocess then
-			if Input.KeyCode == Enum.KeyCode.Insert then
-				executor.Visible = not executor.Visible	
-			end
-		end
-	end)
-end
-coroutine.wrap(ETAOMU_fake_script)()
+-- Connect Button Actions
+exeButton.MouseButton1Click:Connect(onExeButtonClick)
+clrButton.MouseButton1Click:Connect(onClrButtonClick)
+aiButton.MouseButton1Click:Connect(onAiButtonClick)
+removeTextButton.MouseButton1Click:Connect(onRemoveTextButtonClick)
+
+-- Connect Keybind
+UIS.InputBegan:Connect(onKeyPress)
+
+-- Run Frame2 Script
+onFrame2Script()
+
